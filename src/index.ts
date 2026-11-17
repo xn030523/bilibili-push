@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
+import { execSync } from 'node:child_process';
 import { collectDaily } from './collect.js';
 import { rewriteDaily, type VideoScript } from './rewrite.js';
 import { synthesize } from './tts.js';
-import { buildSlideSvg, buildCoverSvg, renderSvg } from './render.js';
-import { buildSegment, concatSegments, loudnorm } from './assemble.js';
+import { buildCoverSvg, renderSvg } from './render.js';
 
 const OUTPUT_DIR = path.join(process.cwd(), 'output');
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -71,44 +71,18 @@ async function main() {
     console.log(`  配音 seg_${seg.id}: OK`);
   }
 
-  // 3. 幻灯片
-  const slideDir = path.join(OUTPUT_DIR, 'slides');
-  ensureDir(slideDir);
-  for (const seg of script.segments) {
-    const svg = buildSlideSvg(seg.title, seg.id, script.segments.length, date);
-    await renderSvg(svg, path.join(slideDir, `slide_${pad(seg.id)}.png`));
-    console.log(`  幻灯片 seg_${seg.id}: OK`);
-  }
-
-  // 4. 封面
+  // 3. 封面（静态图，投稿用）
   const coverPath = path.join(OUTPUT_DIR, 'cover.png');
   await renderSvg(buildCoverSvg(script.title, date), coverPath);
   console.log('封面:', coverPath);
 
-  // 5. 合成每段视频
-  const videoDir = path.join(OUTPUT_DIR, 'video');
-  ensureDir(videoDir);
-  const segVideos: string[] = [];
-  for (const seg of script.segments) {
-    const slide = path.join(slideDir, `slide_${pad(seg.id)}.png`);
-    const audio = path.join(audioDir, `seg_${pad(seg.id)}.mp3`);
-    const out = path.join(videoDir, `seg_${pad(seg.id)}.mp4`);
-    if (fs.existsSync(out)) {
-      console.log(`  合成 seg_${seg.id}: 已存在，跳过`);
-    } else {
-      await buildSegment(slide, audio, out);
-      console.log(`  合成 seg_${seg.id}: OK`);
-    }
-    segVideos.push(out);
-  }
-
-  // 6. 拼接 + 响度标准化
-  const rawPath = path.join(OUTPUT_DIR, 'raw.mp4');
-  await concatSegments(segVideos, rawPath);
-  console.log('拼接:', rawPath);
-
+  // 4. Remotion 渲染动画成片（动画 PPT + 像素宠物 + 弹幕）
+  console.log('\nRemotion 渲染动画成片…');
+  execSync('npx tsx src/video/gen-props.ts', { stdio: 'inherit' });
   const finalPath = path.join(OUTPUT_DIR, 'final.mp4');
-  await loudnorm(rawPath, finalPath);
+  execSync(`npx remotion render AihotDaily "${finalPath}" --props=output/props.json`, {
+    stdio: 'inherit',
+  });
   console.log('\n成片:', finalPath);
 }
 
