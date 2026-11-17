@@ -8,6 +8,19 @@ const ROOT = process.cwd();
 const OUTPUT = path.join(ROOT, 'output');
 const PUBLIC_AUDIO = path.join(ROOT, 'public', 'audio');
 
+interface Card {
+  title: string;
+  summary: string;
+  category: string;
+}
+
+interface ScriptSegment {
+  id: number;
+  title: string;
+  narration: string;
+  cards: Card[];
+}
+
 function getDuration(file: string): number {
   const out = execFileSync('ffprobe', [
     '-v', 'error',
@@ -24,7 +37,7 @@ function main() {
   const raw = fs.readFileSync(path.join(OUTPUT, 'script.json'), 'utf8');
   const { guid, script } = JSON.parse(raw) as {
     guid: string;
-    script: { title: string; segments: { id: number; title: string; narration: string }[] };
+    script: { title: string; segments: ScriptSegment[] };
   };
 
   const date = guid.replace('daily-', '');
@@ -40,6 +53,7 @@ function main() {
       id: seg.id,
       title: seg.title,
       narration: seg.narration,
+      cards: seg.cards ?? [],
       durationInFrames: Math.ceil((dur + 0.35) * 30),
       audioSrc: `audio/${name}`, // 相对 public 目录
     };

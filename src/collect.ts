@@ -3,18 +3,28 @@ import { FEEDS } from './feeds.js';
 import { loadStore } from './store.js';
 
 export interface DailyItem {
-  guid: string; // daily-YYYY-MM-DD，稳定主键
-  title: string; // "AIHOT 日报 · 日期 — 主标题"
-  link: string; // 站内日报页
-  content: string; // 原始 HTML：导语 + 分类 + 标题链接
-  contentSnippet: string; // 纯文本，喂给 LLM 用
+  guid: string; // daily-YYYY-MM-DD
+  title: string;
+  link: string;
+  content: string;
+  contentSnippet: string;
+  pubDate: string;
+  isoDate?: string;
+}
+
+// 单条新闻（来自 all.xml，含摘要和分类）
+export interface NewsItem {
+  guid: string;
+  title: string;
+  summary: string;
+  category: string;
+  link: string;
   pubDate: string;
   isoDate?: string;
 }
 
 const parser = new Parser();
 
-// 拉 AI 日报，返回尚未处理过的期数（按 guid 去重）
 export async function collectDaily(): Promise<DailyItem[]> {
   const feed = await parser.parseURL(FEEDS.daily);
   const store = loadStore();
@@ -26,6 +36,26 @@ export async function collectDaily(): Promise<DailyItem[]> {
       link: item.link ?? '',
       content: item.content ?? '',
       contentSnippet: item.contentSnippet ?? '',
+      pubDate: item.pubDate ?? '',
+      isoDate: item.isoDate,
+    }));
+}
+
+// 采集最近若干小时内的新闻（含标题、摘要、分类）
+export async function collectAll(sinceHours = 26): Promise<NewsItem[]> {
+  const feed = await parser.parseURL(FEEDS.all);
+  const cutoff = Date.now() - sinceHours * 3600 * 1000;
+  return feed.items
+    .filter((item) => {
+      const t = item.isoDate ? new Date(item.isoDate).getTime() : 0;
+      return t >= cutoff;
+    })
+    .map((item) => ({
+      guid: item.guid ?? '',
+      title: item.title ?? '',
+      summary: item.contentSnippet ?? '',
+      category: item.categories?.[0] ?? 'AI 资讯',
+      link: item.link ?? '',
       pubDate: item.pubDate ?? '',
       isoDate: item.isoDate,
     }));

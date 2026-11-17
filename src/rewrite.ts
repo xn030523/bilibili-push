@@ -1,59 +1,72 @@
 import 'dotenv/config';
-import type { DailyItem } from './collect.js';
+import type { NewsItem } from './collect.js';
 
 const API_KEY = process.env.DEEPSEEK_API_KEY ?? '';
 const BASE = 'https://api.deepseek.com';
 const MODEL = 'deepseek-chat';
 
+export interface Card {
+  title: string;
+  summary: string;
+  category: string;
+}
+
 export interface Segment {
   id: number;
-  title: string; // 分镜标题（幻灯片大字）
+  title: string; // 分镜大标题
   narration: string; // 口播稿（逐字稿）
+  cards: Card[]; // 该分镜展示的新闻卡片
 }
 
 export interface VideoScript {
-  title: string; // 视频标题
-  desc: string; // 简介
-  tag: string; // 标签，逗号分隔
-  segments: Segment[]; // 分镜
+  title: string;
+  desc: string;
+  tag: string;
+  segments: Segment[];
 }
 
-const SYSTEM_PROMPT = `你是 B 站 AI 资讯频道的视频文案编辑，负责把「AI 日报」改写成口播视频脚本。
+const SYSTEM_PROMPT = `你是 B 站 AI 资讯频道的视频文案编辑。我给你当天抓到的 AI 新闻列表（每条含标题、摘要、分类），你要把它做成口播视频脚本。
 
 要求：
 1. 输出必须是 JSON（不要输出 JSON 以外的任何内容），格式如下：
 {
-  "title": "视频标题（≤80字，B站风格，抓眼球但不标题党）",
-  "desc": "视频简介（100-200字，概括本期内容）",
+  "title": "视频标题（≤80字，抓眼球）",
+  "desc": "视频简介（100-200字）",
   "tag": "8-10个标签，逗号分隔",
   "segments": [
-    {"id": 1, "title": "分镜标题（幻灯片大字，≤16字）", "narration": "该分镜口播稿"},
-    {"id": 2, "title": "…", "narration": "…"}
+    {
+      "id": 1,
+      "title": "分镜大标题（≤16字）",
+      "narration": "该分镜口播稿（逐字稿）",
+      "cards": [
+        {"title": "新闻标题", "summary": "一句话摘要（≤30字）", "category": "分类"},
+        {"title": "新闻标题2", "summary": "一句话摘要（≤30字）", "category": "分类"}
+      ]
+    }
   ]
 }
 
-2. segments 数量 3-6 段：
-   - 第 1 段是开场：问候 + 日期 + 本期一句话总览
-   - 中间段：按主题分组播报（每条新闻 1-2 句，讲清"谁做了什么、为什么重要"）
-   - 最后 1 段：简短收尾（引导关注/下期预告）
+2. segments 3-5 段，每段 2-4 张 cards。cards 从新闻列表里选取，尽量覆盖重要新闻：
+   - title 保留新闻原标题的意思
+   - summary 提炼成一句话（20-30 字，适合放幻灯片）
+   - category 用列表里的分类
 
-3. 口播稿要求：
-   - 口语化、像真人主播说话，不要书面腔、不要罗列式
-   - 中文语速约 4-5 字/秒，全文 350-500 字（约 80-110 秒）
-   - narration 是逐字稿，直接念出来就通顺
+3. 口播稿要求：口语化，像真人主播播报；全文 350-500 字（约 80-110 秒）；narration 是逐字稿，直接念就通顺。
 
-4. title 要独立、吸引点击，不要照抄日报原标题。
-
-5. 遇到"今日安静无大事"这类内容，也要生成一段得体的播报（简短总结近期 AI 圈平静，展望后续）。
+4. title 独立吸引人，不照抄新闻标题。
 
 只输出 JSON。`;
 
-export async function rewriteDaily(item: DailyItem): Promise<VideoScript> {
+export async function rewriteDaily(news: NewsItem[]): Promise<VideoScript> {
   if (!API_KEY) {
     throw new Error('未设置 DEEPSEEK_API_KEY，请在 .env 里填写后重跑');
   }
 
-  const userPrompt = `以下是 ${item.guid} 的 AI 日报内容：\n\n${item.contentSnippet}\n\n请按 system 要求改写为口播视频脚本 JSON。`;
+  const newsText = news
+    .map((n, i) => `${i + 1}. [${n.category}] ${n.title}：${n.summary}`)
+    .join('\n');
+
+  const userPrompt = `当天抓到的 AI 新闻列表：\n\n${newsText || '（无）'}\n\n请按 system 要求改写为口播视频脚本 JSON。`;
 
   const resp = await fetch(`${BASE}/chat/completions`, {
     method: 'POST',
