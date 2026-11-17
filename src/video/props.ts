@@ -5,6 +5,12 @@ export interface Card {
   category: string;
 }
 
+export interface Subtitle {
+  text: string;
+  startFrame: number;
+  endFrame: number;
+}
+
 export interface SegmentProps {
   id: number;
   title: string;
@@ -12,6 +18,7 @@ export interface SegmentProps {
   cards: Card[];
   durationInFrames: number;
   audioSrc: string;
+  subtitles: Subtitle[];
 }
 
 export interface VideoProps {

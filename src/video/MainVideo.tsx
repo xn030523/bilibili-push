@@ -11,7 +11,7 @@ export const MainVideo = ({ title, date, segments }: VideoProps) => {
       {segments.map((seg) => {
         const seq = (
           <Sequence key={seg.id} from={from} durationInFrames={seg.durationInFrames}>
-            <Slide title={seg.title} cards={seg.cards} index={seg.id} total={segments.length} date={date} />
+            <Slide title={seg.title} cards={seg.cards} subtitles={seg.subtitles} index={seg.id} total={segments.length} date={date} />
             <Audio src={staticFile(seg.audioSrc)} />
           </Sequence>
         );

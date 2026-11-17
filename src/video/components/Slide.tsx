@@ -1,9 +1,11 @@
 import { AbsoluteFill, useCurrentFrame, useVideoConfig, spring, interpolate } from 'remotion';
-import type { Card } from '../props';
+import type { Card, Subtitle } from '../props';
+import { SubtitleStream } from './SubtitleStream';
 
 interface SlideProps {
   title: string;
   cards: Card[];
+  subtitles: Subtitle[];
   index: number;
   total: number;
   date: string;
@@ -18,7 +20,7 @@ const CATEGORY_COLORS: Record<string, string> = {
   '观点': '#f0a020',
 };
 
-export const Slide = ({ title, cards, index, total, date }: SlideProps) => {
+export const Slide = ({ title, cards, subtitles, index, total, date }: SlideProps) => {
   const frame = useCurrentFrame();
   const { fps, durationInFrames } = useVideoConfig();
 
@@ -30,101 +32,95 @@ export const Slide = ({ title, cards, index, total, date }: SlideProps) => {
 
   const progress = `${String(index).padStart(2, '0')} / ${String(total).padStart(2, '0')}`;
 
+  // 卡片随进度轮换高亮
+  const perCard = durationInFrames / Math.max(1, cards.length);
+  const activeIdx = Math.min(cards.length - 1, Math.floor(frame / perCard));
+
   return (
     <AbsoluteFill
       style={{
-        background: '#0d1117',
+        background: '#0b0f1a',
         opacity: exitFade,
-        padding: '72px 120px',
         fontFamily: 'PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif',
+        overflow: 'hidden',
       }}
     >
-      {/* 分镜标题 */}
-      <div style={{ display: 'flex', alignItems: 'center', gap: 24, marginBottom: 44 }}>
-        <div
-          style={{
-            width: 8,
-            height: 52,
-            borderRadius: 4,
-            background: 'linear-gradient(180deg, #00e5ff, #2563ff)',
-          }}
-        />
-        <div
-          style={{
-            fontSize: 54,
-            fontWeight: 700,
-            color: '#f0f6fc',
-            transform: `translateY(${interpolate(titleEnter, [0, 1], [36, 0])}px)`,
-            opacity: titleEnter,
-          }}
-        >
-          {title}
+      {/* 背景动态光斑 */}
+      <div
+        style={{
+          position: 'absolute',
+          width: 900,
+          height: 900,
+          left: '12%',
+          top: '18%',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(37,99,255,0.22), transparent 65%)',
+          transform: `translate(${interpolate(Math.sin(frame / 80), [-1, 1], [-60, 60])}px, ${interpolate(
+            Math.cos(frame / 100),
+            [-1, 1],
+            [-40, 40],
+          )}px)`,
+        }}
+      />
+      <div
+        style={{
+          position: 'absolute',
+          width: 800,
+          height: 800,
+          right: '6%',
+          bottom: '10%',
+          borderRadius: '50%',
+          background: 'radial-gradient(circle, rgba(255,138,0,0.16), transparent 65%)',
+          transform: `translate(${interpolate(Math.cos(frame / 90), [-1, 1], [-50, 50])}px, ${interpolate(
+            Math.sin(frame / 70),
+            [-1, 1],
+            [-30, 30],
+          )}px)`,
+        }}
+      />
+
+      {/* 顶部标题条 */}
+      <div
+        style={{
+          position: 'absolute',
+          top: 48,
+          left: 120,
+          right: 120,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: 22 }}>
+          <div
+            style={{
+              width: 8,
+              height: 48,
+              borderRadius: 4,
+              background: 'linear-gradient(180deg, #00e5ff, #2563ff)',
+            }}
+          />
+          <div
+            style={{
+              fontSize: 50,
+              fontWeight: 700,
+              color: '#f0f6fc',
+              transform: `translateY(${interpolate(titleEnter, [0, 1], [30, 0])}px)`,
+              opacity: titleEnter,
+            }}
+          >
+            {title}
+          </div>
+        </div>
+        <div style={{ fontSize: 26, color: '#6b7a8a', fontVariantNumeric: 'tabular-nums' }}>
+          {progress}
         </div>
       </div>
 
-      {/* 新闻卡片列表 */}
-      <div style={{ display: 'flex', flexDirection: 'column', gap: 22 }}>
-        {cards.map((card, i) => {
-          const delay = i * 7;
-          const enter = spring({ frame: frame - delay, fps, config: { damping: 16, stiffness: 110 } });
-          const y = interpolate(enter, [0, 1], [56, 0]);
-          const opacity = interpolate(frame, [delay, delay + 12], [0, 1]);
-          return (
-            <div
-              key={i}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: 28,
-                background: 'rgba(255,255,255,0.045)',
-                border: '1px solid rgba(255,255,255,0.09)',
-                borderRadius: 16,
-                padding: '30px 36px',
-                transform: `translateY(${y}px)`,
-                opacity,
-              }}
-            >
-              <div
-                style={{
-                  fontSize: 30,
-                  color: '#475569',
-                  width: 52,
-                  textAlign: 'center',
-                  fontVariantNumeric: 'tabular-nums',
-                  fontWeight: 600,
-                }}
-              >
-                {String(i + 1).padStart(2, '0')}
-              </div>
-              <div
-                style={{
-                  background: CATEGORY_COLORS[card.category] ?? '#475569',
-                  color: '#fff',
-                  fontSize: 22,
-                  fontWeight: 600,
-                  padding: '6px 18px',
-                  borderRadius: 999,
-                  whiteSpace: 'nowrap',
-                }}
-              >
-                {card.category}
-              </div>
-              <div style={{ flex: 1, minWidth: 0 }}>
-                <div style={{ fontSize: 34, fontWeight: 600, color: '#e6edf3', lineHeight: 1.35 }}>
-                  {card.title}
-                </div>
-                {card.summary ? (
-                  <div style={{ fontSize: 26, color: '#8b98a5', marginTop: 6, lineHeight: 1.45 }}>
-                    {card.summary}
-                  </div>
-                ) : null}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+      {/* 中央大字字幕流 */}
+      <SubtitleStream subtitles={subtitles} />
 
-      {/* 底部信息 */}
+      {/* 底部新闻卡片缩略条 */}
       <div
         style={{
           position: 'absolute',
@@ -132,14 +128,56 @@ export const Slide = ({ title, cards, index, total, date }: SlideProps) => {
           right: 120,
           bottom: 52,
           display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
+          gap: 20,
+          justifyContent: 'center',
         }}
       >
-        <div style={{ fontSize: 26, color: '#6b7a8a' }}>{date} · AI 日报</div>
-        <div style={{ fontSize: 26, color: '#6b7a8a', fontVariantNumeric: 'tabular-nums' }}>
-          {progress}
-        </div>
+        {cards.map((card, i) => {
+          const delay = i * 8;
+          const enter = spring({ frame: frame - delay, fps, config: { damping: 16, stiffness: 110 } });
+          const active = i === activeIdx;
+          return (
+            <div
+              key={i}
+              style={{
+                flex: 1,
+                maxWidth: 540,
+                display: 'flex',
+                alignItems: 'center',
+                gap: 16,
+                background: active ? 'rgba(255,138,0,0.12)' : 'rgba(255,255,255,0.04)',
+                border: `1px solid ${active ? 'rgba(255,138,0,0.7)' : 'rgba(255,255,255,0.08)'}`,
+                borderRadius: 14,
+                padding: '16px 22px',
+                transform: `translateY(${interpolate(enter, [0, 1], [40, 0])}px) scale(${active ? 1.03 : 1})`,
+                opacity: active ? 1 : 0.55,
+                boxShadow: active ? '0 0 28px rgba(255,138,0,0.25)' : 'none',
+              }}
+            >
+              <div
+                style={{
+                  background: CATEGORY_COLORS[card.category] ?? '#475569',
+                  color: '#fff',
+                  fontSize: 18,
+                  fontWeight: 600,
+                  padding: '4px 14px',
+                  borderRadius: 999,
+                  whiteSpace: 'nowrap',
+                }}
+              >
+                {card.category}
+              </div>
+              <div style={{ fontSize: 24, fontWeight: 600, color: active ? '#ffd9a8' : '#b6c2cf', lineHeight: 1.35, minWidth: 0, overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
+                {card.title}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+
+      {/* 底部日期 */}
+      <div style={{ position: 'absolute', left: 120, bottom: 14, fontSize: 22, color: '#5c6b7a' }}>
+        {date} · AI 日报
       </div>
     </AbsoluteFill>
   );
