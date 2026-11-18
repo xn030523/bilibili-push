@@ -1,8 +1,12 @@
 node_modules/
 dist/
 .env
-data/
+data/*
+!data/processed.json
 output/
 
 .DS_Store
 public/
+config.json
+logs/
+web/dist/

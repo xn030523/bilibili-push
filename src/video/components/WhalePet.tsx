@@ -1,3 +1,4 @@
+import type { CSSProperties } from 'react';
 import { useCurrentFrame, useVideoConfig } from 'remotion';
 
 // DeepSeek 蓝白像素鲸鱼（26x23），头朝左、尾巴朝右。
@@ -138,10 +139,22 @@ const PixelLayer = ({ matrix, offsetX = 0, offsetY = 0 }: PixelLayerProps) => (
 );
 
 interface WhalePetProps {
-  isTalking: boolean;
+  isTalking?: boolean;
+  px?: number;
+  left?: number;
+  top?: number;
+  right?: number;
+  bottom?: number;
 }
 
-export const WhalePet = ({ isTalking }: WhalePetProps) => {
+export const WhalePet = ({
+  isTalking = false,
+  px = 12,
+  left,
+  top,
+  right = 80,
+  bottom = 180,
+}: WhalePetProps) => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 
@@ -161,14 +174,17 @@ export const WhalePet = ({ isTalking }: WhalePetProps) => {
   // 说话时嘴巴快速开合：4 帧张开 2px，4 帧收窄 1px；不说话时保持闭合细线
   const mouthHeight = isTalking ? (frame % 8 < 4 ? 2 : 1) : 0.9;
 
-  const px = 12; // 每像素放大倍数，整体约 312 x 276
+  // 传了 left/top 用左上定位（封面居中），否则右下定位（视频默认）
+  const pos: CSSProperties =
+    left !== undefined || top !== undefined
+      ? { left, top }
+      : { right, bottom };
 
   return (
     <div
       style={{
         position: 'absolute',
-        right: 80,
-        bottom: 64,
+        ...pos,
         transform: `translateY(${bob}px)`,
         transformOrigin: 'bottom center',
       }}

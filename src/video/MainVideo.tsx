@@ -3,7 +3,6 @@ import type { VideoProps } from './props';
 import { Slide } from './components/Slide';
 import { WhalePet } from './components/WhalePet';
 import { PixelBackground } from './components/PixelBackground';
-import { Danmaku } from './components/Danmaku';
 
 export const MainVideo = ({ title, date, segments }: VideoProps) => {
   let from = 0;
@@ -23,9 +22,8 @@ export const MainVideo = ({ title, date, segments }: VideoProps) => {
         return seq;
       })}
 
-      {/* 全局层：鲸鱼宠物 + 弹幕 */}
+      {/* 全局层：鲸鱼宠物 */}
       <WhalePet isTalking />
-      <Danmaku />
     </AbsoluteFill>
   );
 };
