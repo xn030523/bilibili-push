@@ -1,10 +1,10 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execSync } from 'node:child_process';
-import { collectDaily, collectAll } from './collect.js';
-import { rewriteDaily, type VideoScript } from './rewrite.js';
-import { synthesize } from './tts.js';
-import { buildCoverSvg, renderSvg } from './render.js';
+import { collectDaily, collectAll } from './pipeline/collect.js';
+import { rewriteDaily, type VideoScript } from './pipeline/rewrite.js';
+import { synthesize } from './pipeline/tts.js';
+import { buildCoverSvg, renderSvg } from './pipeline/render.js';
 
 const OUTPUT_DIR = path.join(process.cwd(), 'output');
 const pad = (n: number) => String(n).padStart(2, '0');

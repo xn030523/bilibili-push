@@ -8,15 +8,18 @@ export const RemotionRoot = () => {
   return (
     <Composition
       id="AihotDaily"
-      component={MainVideo}
+      component={MainVideo as never}
       durationInFrames={1}
       fps={30}
       width={1920}
       height={1080}
       defaultProps={defaultProps}
-      calculateMetadata={({ props }) => ({
-        durationInFrames: props.segments.reduce((s, seg) => s + seg.durationInFrames, 0),
-      })}
+      calculateMetadata={({ props }) => {
+        const p = props as unknown as VideoProps;
+        return {
+          durationInFrames: p.segments.reduce((s, seg) => s + seg.durationInFrames, 0),
+        };
+      }}
     />
   );
 };

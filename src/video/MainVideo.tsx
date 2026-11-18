@@ -1,13 +1,17 @@
 import { AbsoluteFill, Sequence, Audio, staticFile } from 'remotion';
 import type { VideoProps } from './props';
 import { Slide } from './components/Slide';
-import { PixelPet } from './components/PixelPet';
+import { WhalePet } from './components/WhalePet';
+import { PixelBackground } from './components/PixelBackground';
 import { Danmaku } from './components/Danmaku';
 
 export const MainVideo = ({ title, date, segments }: VideoProps) => {
   let from = 0;
   return (
-    <AbsoluteFill style={{ background: '#060d24' }}>
+    <AbsoluteFill>
+      {/* 底层：像素风背景 */}
+      <PixelBackground />
+
       {segments.map((seg) => {
         const seq = (
           <Sequence key={seg.id} from={from} durationInFrames={seg.durationInFrames}>
@@ -19,8 +23,8 @@ export const MainVideo = ({ title, date, segments }: VideoProps) => {
         return seq;
       })}
 
-      {/* 全局层：像素宠物 + 弹幕 */}
-      <PixelPet />
+      {/* 全局层：鲸鱼宠物 + 弹幕 */}
+      <WhalePet isTalking />
       <Danmaku />
     </AbsoluteFill>
   );

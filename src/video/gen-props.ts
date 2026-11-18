@@ -3,7 +3,7 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { execFileSync } from 'node:child_process';
-import { synthesize } from '../tts.js';
+import { synthesize } from '../pipeline/tts.js';
 
 const ROOT = process.cwd();
 const OUTPUT = path.join(ROOT, 'output');

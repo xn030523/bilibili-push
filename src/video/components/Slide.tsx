@@ -39,46 +39,11 @@ export const Slide = ({ title, cards, subtitles, index, total, date }: SlideProp
   return (
     <AbsoluteFill
       style={{
-        background: '#0b0f1a',
         opacity: exitFade,
         fontFamily: 'PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif',
         overflow: 'hidden',
       }}
     >
-      {/* 背景动态光斑 */}
-      <div
-        style={{
-          position: 'absolute',
-          width: 900,
-          height: 900,
-          left: '12%',
-          top: '18%',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(37,99,255,0.22), transparent 65%)',
-          transform: `translate(${interpolate(Math.sin(frame / 80), [-1, 1], [-60, 60])}px, ${interpolate(
-            Math.cos(frame / 100),
-            [-1, 1],
-            [-40, 40],
-          )}px)`,
-        }}
-      />
-      <div
-        style={{
-          position: 'absolute',
-          width: 800,
-          height: 800,
-          right: '6%',
-          bottom: '10%',
-          borderRadius: '50%',
-          background: 'radial-gradient(circle, rgba(255,138,0,0.16), transparent 65%)',
-          transform: `translate(${interpolate(Math.cos(frame / 90), [-1, 1], [-50, 50])}px, ${interpolate(
-            Math.sin(frame / 70),
-            [-1, 1],
-            [-30, 30],
-          )}px)`,
-        }}
-      />
-
       {/* 顶部标题条 */}
       <div
         style={{
