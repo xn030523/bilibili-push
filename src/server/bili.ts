@@ -85,7 +85,8 @@ export async function getPublishedVideos(c: BiliCookies): Promise<PublishedVideo
 
   const list = j.data?.arc_audits ?? j.data?.archives ?? [];
   return list.map((item: any) => {
-    const arc = item.archive ?? item ?? {};
+    // 创作中心真实字段：大写 Archive + 顶层 stat
+    const arc = item.Archive ?? item.archive ?? item ?? {};
     const stat = item.stat ?? item.count ?? {};
     return {
       bvid: arc.bvid ?? '',
