@@ -69,8 +69,8 @@ npm run publish
 | 位置 | 内容 | 说明 |
 |---|---|---|
 | `.env` | `DEEPSEEK_API_KEY` | DeepSeek 密钥（改写文案用） |
-| `.env` | `BILI_SESSDATA` / `BILI_JCT` | 可选，投稿登录态 |
-| `config.json` | `npm run login` 扫码后自动生成 | B站 Cookie |
+| `config.json` | `npm run login` 扫码后自动生成 | B站 Cookie（本地投稿用） |
+| GitHub Secrets | `BILI_SESSDATA` / `BILI_JCT` | 云端自动投稿登录态 |
 
 > 以上文件都在 `.gitignore` 里，**不会泄露**。
 
