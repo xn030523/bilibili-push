@@ -6,6 +6,7 @@ import { rewriteDaily, type VideoScript } from './pipeline/rewrite.js';
 import { synthesize } from './pipeline/tts.js';
 import { publish } from './pipeline/publish.js';
 import { markProcessed } from './pipeline/store.js';
+import { loadConfig } from './server/config.js';
 
 const OUTPUT_DIR = path.join(process.cwd(), 'output');
 const pad = (n: number) => String(n).padStart(2, '0');
@@ -119,8 +120,10 @@ async function main() {
   fs.writeFileSync(metaPath, JSON.stringify(meta, null, 2), 'utf8');
 
   // 7. 投稿（有 B站登录态时自动发布；无登录态仅本地生成）
-  const sessdata = process.env.BILI_SESSDATA;
-  const biliJct = process.env.BILI_JCT;
+  // 登录态优先取 env（GitHub Actions 的 secret），本地兜底读 config.json（扫码登录写入）
+  const localAuth = loadConfig().bilibili;
+  const sessdata = process.env.BILI_SESSDATA || localAuth.sessdata;
+  const biliJct = process.env.BILI_JCT || localAuth.biliJct;
   if (sessdata && biliJct) {
     try {
       const result = await publish({

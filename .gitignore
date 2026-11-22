@@ -6,7 +6,5 @@ data/*
 output/
 
 .DS_Store
-public/
 config.json
 logs/
-web/dist/
