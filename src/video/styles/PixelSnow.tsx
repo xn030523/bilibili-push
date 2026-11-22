@@ -1,9 +1,9 @@
-// 像素雪夜：冷蓝夜空 + 冷星 + 飘雪 + 雪地 + 松树剪影
+// 像素雪夜：冷蓝夜空 + 冷星 + 飘雪 + 起伏雪地 + 松树剪影
 import { AbsoluteFill, useCurrentFrame } from 'remotion';
 
 const W = 320;
 const H = 180;
-const GROUND = 148;
+const GROUND = 146;
 
 const BANDS = [
   { y: 0, c: '#0a1424' },
@@ -20,6 +20,9 @@ const hash = (n: number) => {
 
 // 松树矩阵（三角 + 树干）
 const TREE = ['...#...', '..###..', '.#####.', '#######', '...#...', '...#...'];
+
+// 雪地顶部起伏（雪堆）
+const snowTop = (x: number) => -2 + Math.round(1.5 * Math.sin(x / 22 + 1.3) + 1 * Math.sin(x / 8 + 2.7));
 
 export const PixelSnow = () => {
   const frame = useCurrentFrame();
@@ -46,9 +49,27 @@ export const PixelSnow = () => {
           return <rect key={i} x={x} y={y} width={1} height={1} fill="#bcd6ff" opacity={0.3 + hash(i) * 0.5} />;
         })}
 
-        {/* 雪地 */}
-        <rect x={0} y={GROUND} width={W} height={H - GROUND} fill="#e8f2ff" />
-        <rect x={0} y={GROUND} width={W} height={2} fill="#ffffff" />
+        {/* 起伏雪地主体（浅蓝白） */}
+        {Array.from({ length: W / 2 }).map((_, i) => {
+          const x = i * 2;
+          const top = GROUND + snowTop(x);
+          return <rect key={`snow-${i}`} x={x} y={top} width={2} height={H - top} fill="#dbe8fb" />;
+        })}
+
+        {/* 雪地顶部高光（白，起伏） */}
+        {Array.from({ length: W / 2 }).map((_, i) => {
+          const x = i * 2;
+          const top = GROUND + snowTop(x);
+          return <rect key={`hl-${i}`} x={x} y={top} width={2} height={2} fill="#ffffff" />;
+        })}
+
+        {/* 雪地阴影纹理（浅蓝灰，模拟起伏阴影） */}
+        {Array.from({ length: 48 }).map((_, i) => {
+          const x = Math.floor(hash(i * 3.3) * W);
+          const y = GROUND + 5 + Math.floor(hash(i * 7.9) * (H - GROUND - 8));
+          const w = hash(i * 5.7) > 0.5 ? 2 : 1;
+          return <rect key={`sh-${i}`} x={x} y={y} width={w} height={1} fill="#b7cbea" opacity={0.5} />;
+        })}
 
         {/* 松树剪影 */}
         {[24, 88, 156, 224, 288].map((tx, i) => (

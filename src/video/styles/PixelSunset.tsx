@@ -1,9 +1,9 @@
-// 像素日落：紫→橙渐变天空 + 落日 + 逆光山剪影 + 飞鸟掠过
+// 像素日落：紫→橙渐变天空 + 落日 + 双层山剪影 + 落日余晖反光 + 飞鸟掠过
 import { AbsoluteFill, useCurrentFrame } from 'remotion';
 
 const W = 320;
 const H = 180;
-const HORIZON = 142;
+const HORIZON = 140;
 
 const BANDS = [
   { y: 0, c: '#251a38' },
@@ -14,7 +14,6 @@ const BANDS = [
   { y: 88, c: '#a95a58' },
   { y: 106, c: '#c97549' },
   { y: 124, c: '#e2913b' },
-  { y: 138, c: '#f5b354' },
 ];
 
 // 落日的像素圆
@@ -31,7 +30,8 @@ const SUN = [
   '.....########.....',
 ];
 
-const ridge = (x: number) => 8 + 3.6 * Math.sin(x / 18 + 1.3) + 1.8 * Math.sin(x / 7.1 + 2.8);
+const farRidge = (x: number) => 7 + 3.2 * Math.sin(x / 16 + 2.1) + 1.4 * Math.sin(x / 6.3 + 1.0);
+const nearRidge = (x: number) => 6 + 2.6 * Math.sin(x / 12 + 4.3) + 1.2 * Math.sin(x / 5.1 + 0.6);
 
 export const PixelSunset = () => {
   const frame = useCurrentFrame();
@@ -51,7 +51,7 @@ export const PixelSunset = () => {
         })}
 
         {/* 落日 */}
-        <g transform="translate(126 74)" opacity={0.95}>
+        <g transform="translate(126 72)" opacity={0.95}>
           {SUN.flatMap((row, y) =>
             [...row].map((ch, x) =>
               ch === '#' ? <rect key={`${x}-${y}`} x={x} y={y} width={1} height={1} fill="#ffd979" /> : null,
@@ -59,12 +59,24 @@ export const PixelSunset = () => {
           )}
         </g>
 
-        {/* 逆光山剪影 */}
+        {/* 远山剪影（暖紫，靠近地平线） */}
         {Array.from({ length: W / 2 }).map((_, i) => {
           const x = i * 2;
-          const h = Math.max(1, Math.round(ridge(x)));
+          const h = Math.max(1, Math.round(farRidge(x)));
           const top = HORIZON - h;
-          return <rect key={i} x={x} y={top} width={2} height={H - top} fill="#241832" />;
+          return <rect key={`far-${i}`} x={x} y={top} width={2} height={HORIZON + 10 - top} fill="#3a2148" />;
+        })}
+
+        {/* 落日余晖反光带（地平线暖橙渐暗） */}
+        <rect x={0} y={HORIZON + 4} width={W} height={8} fill="#d8843e" opacity={0.5} />
+        <rect x={0} y={HORIZON + 12} width={W} height={5} fill="#8a3c55" opacity={0.45} />
+
+        {/* 近山剪影（更深，填满底部） */}
+        {Array.from({ length: W / 2 }).map((_, i) => {
+          const x = i * 2;
+          const h = Math.max(1, Math.round(nearRidge(x)));
+          const top = HORIZON + 14 - h;
+          return <rect key={`near-${i}`} x={x} y={top} width={2} height={H - top} fill="#160f22" />;
         })}
 
         {/* 飞鸟（3 只，缓慢右移的 V 形） */}
