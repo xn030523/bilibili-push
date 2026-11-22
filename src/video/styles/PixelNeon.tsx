@@ -1,9 +1,13 @@
-// 赛博霓虹：暗紫底 + 横向网格 + 霓虹建筑竖条 + 浮动光点
+// 赛博霓虹：暗紫底 + 横向网格 + 霓虹建筑竖条 + 湿地面倒影 + 浮动光点
 import { AbsoluteFill, useCurrentFrame } from 'remotion';
 
 const W = 320;
 const H = 180;
-const HORIZON = 120;
+const HORIZON = 112;
+
+const BUILDINGS = [40, 70, 100, 130, 160, 190, 220, 250, 280];
+const buildingH = (i: number) => 24 + ((i * 37) % 52);
+const buildingColor = (i: number) => (i % 2 === 0 ? '#2de2ff' : '#ff2ec4');
 
 export const PixelNeon = () => {
   const frame = useCurrentFrame();
@@ -22,20 +26,14 @@ export const PixelNeon = () => {
         <rect x={0} y={0} width={W} height={HORIZON} fill="rgba(40,20,80,0.25)" />
 
         {/* 横向网格线，越靠下越密 */}
-        {[20, 45, 72, 98, 112].map((y, i) => (
+        {[20, 45, 72, 98].map((y, i) => (
           <rect key={y} x={0} y={y} width={W} height={1} fill="#ff2ec4" opacity={0.1 + i * 0.03} />
         ))}
 
-        {/* 霓虹地平线 */}
-        <rect x={0} y={HORIZON - 1} width={W} height={2} fill="#2de2ff" opacity={0.6} />
-
-        {/* 地面 */}
-        <rect x={0} y={HORIZON} width={W} height={H - HORIZON} fill="#08050f" />
-
         {/* 建筑竖条霓虹（青/粉交替，微闪烁） */}
-        {[40, 70, 100, 130, 160, 190, 220, 250, 280].map((x, i) => {
-          const h = 24 + ((i * 37) % 52);
-          const color = i % 2 === 0 ? '#2de2ff' : '#ff2ec4';
+        {BUILDINGS.map((x, i) => {
+          const h = buildingH(i);
+          const color = buildingColor(i);
           const blink = frame % 30 < 15 ? 0.9 : 0.5;
           return (
             <g key={x} opacity={blink}>
@@ -47,6 +45,33 @@ export const PixelNeon = () => {
             </g>
           );
         })}
+
+        {/* 霓虹地平线 */}
+        <rect x={0} y={HORIZON - 1} width={W} height={2} fill="#2de2ff" opacity={0.6} />
+
+        {/* 地面（深紫，非纯黑） */}
+        <rect x={0} y={HORIZON} width={W} height={H - HORIZON} fill="#0f0a1c" />
+
+        {/* 地面霓虹光晕（地平线附近的青/粉反光） */}
+        <rect x={0} y={HORIZON} width={W} height={8} fill="#2de2ff" opacity={0.14} />
+        <rect x={0} y={HORIZON + 8} width={W} height={6} fill="#ff2ec4" opacity={0.1} />
+
+        {/* 建筑倒影（湿地面反光，向下分段渐隐） */}
+        {BUILDINGS.map((x, i) => {
+          const color = buildingColor(i);
+          return (
+            <g key={`ref-${i}`}>
+              <rect x={x} y={HORIZON + 1} width={3} height={10} fill={color} opacity={0.2} />
+              <rect x={x} y={HORIZON + 12} width={3} height={8} fill={color} opacity={0.12} />
+              <rect x={x} y={HORIZON + 21} width={3} height={6} fill={color} opacity={0.06} />
+            </g>
+          );
+        })}
+
+        {/* 地面水平网格（向下渐疏） */}
+        {[134, 150, 170].map((y, i) => (
+          <rect key={y} x={0} y={y} width={W} height={1} fill="#2de2ff" opacity={0.08 - i * 0.02} />
+        ))}
 
         {/* 浮动霓虹光点 */}
         {Array.from({ length: 24 }).map((_, i) => {
