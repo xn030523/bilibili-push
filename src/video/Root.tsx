@@ -3,7 +3,14 @@ import { MainVideo } from './MainVideo';
 import { Cover } from './Cover';
 import type { VideoProps } from './props';
 
-const defaultProps: VideoProps = { title: '', date: '', segments: [] };
+const defaultProps: VideoProps = {
+  title: '',
+  date: '',
+  style: 'night',
+  pet: 'whale',
+  voice: 'zh-CN-YunyangNeural',
+  segments: [],
+};
 
 export const RemotionRoot = () => {
   return (
@@ -30,7 +37,7 @@ export const RemotionRoot = () => {
         fps={30}
         width={1920}
         height={1080}
-        defaultProps={{ title: '', date: '' }}
+        defaultProps={{ title: '', date: '', style: 'night', pet: 'whale' }}
       />
     </>
   );

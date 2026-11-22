@@ -25,10 +25,11 @@
 
 ## 🎬 亮点 · Highlights
 
-- 🐋 **大肥鱼主播**：像素鲸鱼会眨眼、甩尾、喷水、**开口说话**，还会上下漂浮卖萌
-- 🌌 **像素风背景**：星空、月亮、云朵、远山、海浪，全是像素块拼的
+- 🐋 **5 只像素宠物**：鲸鱼 / 猫 / 机器人 / 狐狸 / 企鹅，各自会眨眼、开口说话、上下浮动卖萌
+- 🎨 **5 套像素背景**：夜空 / 日落 / 霓虹 / 雪夜 / 森林，星空、落日、霓虹楼、飘雪、层叠松树
+- 🤖 **AI 自动选风格与配音**：DeepSeek 根据当天新闻气质，自动挑背景、宠物和音色，每天不重样
 - 🗣️ **字幕口播严格对齐**：逐句 TTS，每句字幕时长 = 那句音频的真实时长
-- 🎨 **统一封面**：像素背景 + 大肥鱼 + 固定标题版式，每期视觉一致
+- 🖼️ **封面与成片同款**：封面复用同一套风格/宠物，视觉一致
 - 📱 **终端扫码登录**：一条命令在终端生成二维码，手机扫完 Cookie 自动写入 `config.json`
 - 🛡️ **合规标题**：改写 prompt 内置防「不实信息」约束，避免耸动/夸大标题被 B站审核退回
 - ☁️ **免费定时**：GitHub Actions 每天自动跑，不占自己服务器
@@ -93,7 +94,11 @@ npm run publish
 ├── src/
 │   ├── index.ts               # 管道入口：采集→改写→配音→封面→渲染→发布
 │   ├── pipeline/              # collect / rewrite / tts / publish / store / feeds
-│   ├── video/                 # Remotion 视频（MainVideo / Cover / 像素组件）
+│   ├── video/
+│   │   ├── MainVideo.tsx / Cover.tsx / Root.tsx
+│   │   ├── styles/            # 5 套像素背景（night/sunset/neon/snow/forest）
+│   │   ├── pets/              # 5 只像素宠物（whale/cat/robot/fox/penguin）
+│   │   └── registry.ts        # 名字 → 组件映射
 │   └── server/                # auth（扫码）/ bili（账户）/ config / qrlogin（登录脚本）
 ├── .github/workflows/         # GitHub Actions 定时自动发布
 ├── README.md

@@ -1,6 +1,5 @@
-import { AbsoluteFill, useVideoConfig } from 'remotion';
-import { PixelBackground } from './components/PixelBackground';
-import { WhalePet } from './components/WhalePet';
+import { AbsoluteFill } from 'remotion';
+import { getStyle, getPet } from './registry';
 
 const FONT = 'PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif';
 
@@ -8,11 +7,13 @@ const FONT = 'PingFang SC, Noto Sans CJK SC, Microsoft YaHei, sans-serif';
 const TITLE_SIZE = 96;
 const TITLE_LINE_HEIGHT = 130;
 const CHARS_PER_LINE = 14;
-const WHALE_PX = 20; // 大肥鱼放大倍数（26 列 x 20 = 520px 宽）
+const PET_PX = 20; // 宠物放大倍数
 
 interface CoverProps {
   title: string;
   date: string;
+  style?: string;
+  pet?: string;
 }
 
 function wrapTitle(title: string): string[] {
@@ -29,18 +30,21 @@ function wrapTitle(title: string): string[] {
   return lines.length ? lines : [title];
 }
 
-export const Cover = ({ title, date }: CoverProps) => {
-  const { width } = useVideoConfig(); // 1920
+export const Cover = ({ title, date, style, pet }: CoverProps) => {
+  const Background = getStyle(style);
+  const Pet = getPet(pet);
   const lines = wrapTitle(title);
   const startY = 700 - ((lines.length - 1) * TITLE_LINE_HEIGHT) / 2;
 
   return (
     <AbsoluteFill style={{ background: '#0b0f1a', overflow: 'hidden' }}>
       {/* 像素风背景（与视频同款） */}
-      <PixelBackground />
+      <Background />
 
-      {/* 大肥鱼：居中，位于标题上方 */}
-      <WhalePet px={WHALE_PX} left={(width - 26 * WHALE_PX) / 2} top={90} />
+      {/* 宠物主播：flex 居中，位于标题上方 */}
+      <div style={{ position: 'absolute', top: 90, width: '100%', display: 'flex', justifyContent: 'center' }}>
+        <Pet px={PET_PX} inline />
+      </div>
 
       {/* 顶部日期 */}
       <div

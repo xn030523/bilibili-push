@@ -181,7 +181,7 @@ const backCrest = (x: number, frame: number) =>
 const frontCrest = (x: number, frame: number) =>
   Math.round(154 + 1.7 * Math.sin(x / 11 - frame / 48) + 0.9 * Math.sin(x / 4.7 + frame / 72 + 1.7));
 
-export const PixelBackground = () => {
+export const PixelNight = () => {
   const frame = useCurrentFrame();
   const { fps } = useVideoConfig();
 

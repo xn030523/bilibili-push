@@ -22,6 +22,9 @@ export interface VideoScript {
   title: string;
   desc: string;
   tag: string;
+  style: string; // 背景风格枚举
+  pet: string; // 宠物枚举
+  voice: string; // 配音音色枚举
   segments: Segment[];
 }
 
@@ -33,6 +36,9 @@ const SYSTEM_PROMPT = `你是 B 站 AI 资讯频道的视频文案编辑。我�
   "title": "视频标题（≤40字，客观准确）",
   "desc": "视频简介（100-200字）",
   "tag": "8-10个标签，逗号分隔",
+  "style": "背景风格枚举值（见要求5）",
+  "pet": "宠物枚举值（见要求5）",
+  "voice": "配音音色枚举值（见要求5）",
   "segments": [
     {
       "id": 1,
@@ -59,6 +65,11 @@ const SYSTEM_PROMPT = `你是 B 站 AI 资讯频道的视频文案编辑。我�
    - 严禁把「传闻 / 研究 / 猜测 / 网传」性质的内容，写成已确证的事实；未证实的内容必须加「据称 / 网传 / 疑似 / 传闻」等限定词。
    - 若新闻本身是「某团队声称 / 论文尚未同行评审」之类，需如实保留其不确定性，不要写成板上钉钉。
    - 标题写「今天 AI 圈值得关注的事」这类客观概括，或直接点出当天最重要的 1 条事实即可，不要为了吸引点击而夸大。
+
+5. style / pet / voice 三个字段必须从下面的枚举里各选一个（只能输出枚举值本身，不要自由发挥），贴合当天新闻整体气质，且三者气质要协调（例如硬核芯片新闻可配 neon + robot + 云健浑厚男声）：
+   - style：night=冷静科技（大厂/模型/论文）｜sunset=温暖利好（消费/产品/融资）｜neon=硬核突破（芯片/开源/前沿）｜snow=清爽简洁（冬季/极简）｜forest=自然生命（生物/绿色/医疗）
+   - pet：whale=通用稳重｜cat=轻松生活向｜robot=硬核科技｜fox=机智创意｜penguin=可爱冷静（开源社区）
+   - voice：zh-CN-YunyangNeural=云扬新闻男声（专业稳重）｜zh-CN-YunxiNeural=云希年轻男声（清爽）｜zh-CN-XiaoxiaoNeural=晓晓温柔女声（知性）｜zh-CN-XiaoyiNeural=晓伊活泼女声（元气）｜zh-CN-YunjianNeural=云健浑厚男声（有力）
 
 只输出 JSON。`;
 

@@ -81,7 +81,10 @@ async function main() {
   // 4. 封面（Remotion 渲染：像素背景 + 大肥鱼 + 固定标题版式，与成片视觉统一）
   const coverPath = path.join(OUTPUT_DIR, 'cover.png');
   const coverPropsPath = path.join(OUTPUT_DIR, 'cover-props.json');
-  fs.writeFileSync(coverPropsPath, JSON.stringify({ title: script.title, date }));
+  fs.writeFileSync(
+    coverPropsPath,
+    JSON.stringify({ title: script.title, date, style: script.style, pet: script.pet }),
+  );
   execSync(
     `npx remotion still Cover "${coverPath}" --props=${coverPropsPath} --image-format=png`,
     { stdio: 'inherit' },

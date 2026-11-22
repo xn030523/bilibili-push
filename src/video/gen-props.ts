@@ -60,9 +60,18 @@ async function main() {
   const raw = fs.readFileSync(path.join(OUTPUT, 'script.json'), 'utf8');
   const { guid, script } = JSON.parse(raw) as {
     guid: string;
-    script: { title: string; segments: ScriptSegment[] };
+    script: {
+      title: string;
+      style?: string;
+      pet?: string;
+      voice?: string;
+      segments: ScriptSegment[];
+    };
   };
   const date = guid.replace('daily-', '');
+  const style = script.style || 'night';
+  const pet = script.pet || 'whale';
+  const voice = script.voice || 'zh-CN-YunyangNeural';
   fs.mkdirSync(AUDIO_DIR, { recursive: true });
   fs.mkdirSync(PUBLIC_AUDIO, { recursive: true });
 
@@ -77,7 +86,7 @@ async function main() {
       const f = path.join(AUDIO_DIR, `${base}_s${pad2(i)}.mp3`);
       if (!fs.existsSync(f)) {
         process.stdout.write(`  TTS ${base}_s${pad2(i)} (${sentences[i].length}字)\n`);
-        await synthesize(sentences[i], f);
+        await synthesize(sentences[i], f, voice);
         await new Promise((r) => setTimeout(r, 250)); // 句间限速，避免触发 Edge 连接重置
       }
       sentFiles.push(f);
@@ -115,7 +124,7 @@ async function main() {
     console.log(`${base}: ${sentences.length} 句, ${durationInFrames} 帧 (${cursorSec.toFixed(1)}s)`);
   }
 
-  const props = { title: script.title, date, segments };
+  const props = { title: script.title, date, style, pet, voice, segments };
   fs.writeFileSync(path.join(OUTPUT, 'props.json'), JSON.stringify(props, null, 2), 'utf8');
   console.log(`props.json 已生成：${segments.length} 段`);
 }

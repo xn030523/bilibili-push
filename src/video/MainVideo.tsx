@@ -1,15 +1,16 @@
 import { AbsoluteFill, Sequence, Audio, staticFile } from 'remotion';
 import type { VideoProps } from './props';
 import { Slide } from './components/Slide';
-import { WhalePet } from './components/WhalePet';
-import { PixelBackground } from './components/PixelBackground';
+import { getStyle, getPet } from './registry';
 
-export const MainVideo = ({ title, date, segments }: VideoProps) => {
+export const MainVideo = ({ title, date, style, pet, segments }: VideoProps) => {
+  const Background = getStyle(style);
+  const Pet = getPet(pet);
   let from = 0;
   return (
     <AbsoluteFill>
-      {/* 底层：像素风背景 */}
-      <PixelBackground />
+      {/* 底层：按 style 选择的像素风背景 */}
+      <Background />
 
       {segments.map((seg) => {
         const seq = (
@@ -22,8 +23,8 @@ export const MainVideo = ({ title, date, segments }: VideoProps) => {
         return seq;
       })}
 
-      {/* 全局层：鲸鱼宠物 */}
-      <WhalePet isTalking />
+      {/* 全局层：按 pet 选择的宠物主播 */}
+      <Pet isTalking />
     </AbsoluteFill>
   );
 };
